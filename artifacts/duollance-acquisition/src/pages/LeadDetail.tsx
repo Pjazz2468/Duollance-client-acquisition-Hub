@@ -1,13 +1,15 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useParams, Link } from "wouter";
 import { 
   useGetLead, 
+  useUpdateLead,
   useUpdateLeadStage, 
   useGeneratePitch, 
   useCreateOutreach, 
   useListOutreach,
   getGetLeadQueryKey,
-  getListOutreachQueryKey
+  getListOutreachQueryKey,
+  getListLeadsQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -15,10 +17,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, Wand2, Send, Clock, Building, User, Mail, Linkedin, Link as LinkIcon, Briefcase } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Loader2, ArrowLeft, Wand2, Send, Building, User, Mail, Linkedin, Link as LinkIcon, CalendarClock, CalendarCheck, X, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FitScoreBadge, StageBadge, SourceIcon } from "./Leads";
-import { format } from "date-fns";
+import { format, isPast, isToday, differenceInDays } from "date-fns";
 
 export default function LeadDetail() {
   const params = useParams();
@@ -29,20 +33,42 @@ export default function LeadDetail() {
   const { data: lead, isLoading: leadLoading } = useGetLead(id, { query: { enabled: !!id, queryKey: getGetLeadQueryKey(id) } });
   const { data: outreachHistory, isLoading: outreachLoading } = useListOutreach({ leadId: id }, { query: { enabled: !!id, queryKey: getListOutreachQueryKey({ leadId: id }) } });
   
+  const updateLead = useUpdateLead();
   const updateStage = useUpdateLeadStage();
   const generatePitch = useGeneratePitch();
   const createOutreach = useCreateOutreach();
 
   const [messageContent, setMessageContent] = useState("");
   const [selectedChannel, setSelectedChannel] = useState("email");
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const handleStageChange = (newStage: string) => {
     updateStage.mutate({ id, data: { stage: newStage } }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetLeadQueryKey(id) });
+        queryClient.invalidateQueries({ queryKey: getListLeadsQueryKey() });
         toast({ title: "Stage updated" });
       }
     });
+  };
+
+  const handleFollowUpChange = (date: Date | undefined) => {
+    setCalendarOpen(false);
+    updateLead.mutate(
+      { id, data: { followUpAt: date ? date.toISOString() : null } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getGetLeadQueryKey(id) });
+          queryClient.invalidateQueries({ queryKey: getListLeadsQueryKey() });
+          toast({
+            title: date ? `Follow-up set for ${format(date, "MMM d, yyyy")}` : "Follow-up cleared",
+          });
+        },
+        onError: () => {
+          toast({ title: "Failed to set follow-up", variant: "destructive" });
+        },
+      }
+    );
   };
 
   const handleGeneratePitch = () => {
@@ -62,7 +88,6 @@ export default function LeadDetail() {
       toast({ title: "Message cannot be empty", variant: "destructive" });
       return;
     }
-
     createOutreach.mutate({ data: { leadId: id, channel: selectedChannel, message: messageContent, status: "sent" } }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListOutreachQueryKey({ leadId: id }) });
@@ -82,6 +107,11 @@ export default function LeadDetail() {
 
   if (!lead) return <div>Lead not found.</div>;
 
+  const followUpDate = lead.followUpAt ? new Date(lead.followUpAt) : null;
+  const isOverdue = followUpDate && isPast(followUpDate) && !isToday(followUpDate);
+  const isDueToday = followUpDate && isToday(followUpDate);
+  const daysUntil = followUpDate ? differenceInDays(followUpDate, new Date()) : null;
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div className="flex items-center space-x-4">
@@ -90,7 +120,7 @@ export default function LeadDetail() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
-        <div className="flex-1 flex items-center justify-between">
+        <div className="flex-1 flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center space-x-3">
               <span>{lead.companyName}</span>
@@ -98,8 +128,7 @@ export default function LeadDetail() {
             </h1>
             <p className="text-sm text-muted-foreground">{lead.industry} • {lead.companySize} employees</p>
           </div>
-          <div className="flex items-center space-x-3">
-            <span className="text-sm font-medium text-muted-foreground">Current Stage:</span>
+          <div className="flex items-center gap-3 flex-wrap">
             <Select value={lead.stage} onValueChange={handleStageChange}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue />
@@ -130,18 +159,96 @@ export default function LeadDetail() {
                   <div className="text-xs text-muted-foreground">{lead.contactTitle}</div>
                 </div>
               </div>
-              
               {lead.contactEmail && (
                 <div className="flex items-center space-x-3">
                   <Mail className="h-4 w-4 text-muted-foreground" />
                   <a href={`mailto:${lead.contactEmail}`} className="text-sm text-primary hover:underline">{lead.contactEmail}</a>
                 </div>
               )}
-              
               {lead.contactLinkedIn && (
                 <div className="flex items-center space-x-3">
                   <Linkedin className="h-4 w-4 text-muted-foreground" />
                   <a href={lead.contactLinkedIn} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline">LinkedIn Profile</a>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className={isOverdue ? "border-red-300 bg-red-50/50" : isDueToday ? "border-orange-300 bg-orange-50/50" : ""}>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                {isOverdue ? (
+                  <AlertTriangle className="h-4 w-4 text-red-500" />
+                ) : isDueToday ? (
+                  <CalendarCheck className="h-4 w-4 text-orange-500" />
+                ) : (
+                  <CalendarClock className="h-4 w-4 text-muted-foreground" />
+                )}
+                Follow-up
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {followUpDate ? (
+                <div className="space-y-2">
+                  <div className={`text-sm font-semibold ${isOverdue ? "text-red-600" : isDueToday ? "text-orange-600" : "text-foreground"}`}>
+                    {format(followUpDate, "MMMM d, yyyy")}
+                  </div>
+                  <div className={`text-xs ${isOverdue ? "text-red-500" : isDueToday ? "text-orange-500" : "text-muted-foreground"}`}>
+                    {isOverdue
+                      ? `Overdue by ${Math.abs(daysUntil!)} day${Math.abs(daysUntil!) !== 1 ? "s" : ""}`
+                      : isDueToday
+                      ? "Due today"
+                      : daysUntil === 1
+                      ? "Due tomorrow"
+                      : `In ${daysUntil} days`}
+                  </div>
+                  <div className="flex gap-2 pt-1">
+                    <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="flex-1 text-xs h-8">
+                          Reschedule
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={followUpDate}
+                          onSelect={handleFollowUpChange}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                      onClick={() => handleFollowUpChange(undefined)}
+                      disabled={updateLead.isPending}
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">No follow-up scheduled.</p>
+                  <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className="w-full text-xs h-8 gap-1.5">
+                        <CalendarClock className="h-3.5 w-3.5" />
+                        Set reminder
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={undefined}
+                        onSelect={handleFollowUpChange}
+                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
               )}
             </CardContent>
@@ -163,12 +270,10 @@ export default function LeadDetail() {
                   </a>
                 )}
               </div>
-              
               <div>
                 <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Pain Point</div>
                 <Badge variant="outline" className="capitalize">{lead.painPoint}</Badge>
               </div>
-
               {lead.sourceContext && (
                 <div>
                   <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Context</div>
@@ -197,7 +302,6 @@ export default function LeadDetail() {
                     <SelectItem value="twitter">Twitter / X</SelectItem>
                   </SelectContent>
                 </Select>
-                
                 <Button 
                   variant="secondary" 
                   onClick={handleGeneratePitch} 
@@ -208,14 +312,12 @@ export default function LeadDetail() {
                   Generate AI Pitch
                 </Button>
               </div>
-
               <Textarea 
                 placeholder="Type your message here, or generate an AI pitch..." 
                 className="min-h-[200px] resize-y"
                 value={messageContent}
                 onChange={(e) => setMessageContent(e.target.value)}
               />
-
               <div className="flex justify-end">
                 <Button onClick={handleSendOutreach} disabled={createOutreach.isPending || !messageContent.trim()}>
                   {createOutreach.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
