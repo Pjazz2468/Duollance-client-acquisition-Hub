@@ -1,0 +1,1 @@
+- [Duollance Acquisition Tool](duollance-acquisition.md) — full-stack internal HR tool; stack, auth setup, and key decisions documented

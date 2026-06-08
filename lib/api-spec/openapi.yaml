@@ -3,20 +3,30 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Duollance Client Acquisition Tool API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: leads
+    description: Lead management
+  - name: outreach
+    description: Outreach messages
+  - name: pipeline
+    description: Pipeline and CRM
+  - name: ai
+    description: AI-powered features
+  - name: dashboard
+    description: Dashboard analytics
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +34,565 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /leads:
+    get:
+      operationId: listLeads
+      tags: [leads]
+      summary: List all leads
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: source
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of leads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lead"
+    post:
+      operationId: createLead
+      tags: [leads]
+      summary: Create a new lead
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeadInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+
+  /leads/{id}:
+    get:
+      operationId: getLead
+      tags: [leads]
+      summary: Get a lead by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lead
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateLead
+      tags: [leads]
+      summary: Update a lead
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeadUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteLead
+      tags: [leads]
+      summary: Delete a lead
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /leads/{id}/approve:
+    patch:
+      operationId: approveLead
+      tags: [leads]
+      summary: Approve a lead
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+
+  /leads/{id}/stage:
+    patch:
+      operationId: updateLeadStage
+      tags: [pipeline]
+      summary: Update lead pipeline stage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StageUpdate"
+      responses:
+        "200":
+          description: Stage updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+
+  /outreach:
+    get:
+      operationId: listOutreach
+      tags: [outreach]
+      summary: List outreach messages for a lead
+      parameters:
+        - name: leadId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of outreach messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OutreachMessage"
+    post:
+      operationId: createOutreach
+      tags: [outreach]
+      summary: Log an outreach message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OutreachInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OutreachMessage"
+
+  /outreach/{id}:
+    patch:
+      operationId: updateOutreach
+      tags: [outreach]
+      summary: Update outreach status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OutreachUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OutreachMessage"
+
+  /ai/generate-pitch:
+    post:
+      operationId: generatePitch
+      tags: [ai]
+      summary: Generate AI outreach pitch for a lead
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PitchRequest"
+      responses:
+        "200":
+          description: Generated pitch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PitchResponse"
+
+  /ai/score-lead:
+    post:
+      operationId: scoreLead
+      tags: [ai]
+      summary: AI-score a lead for Duollance fit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScoreRequest"
+      responses:
+        "200":
+          description: Score result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScoreResponse"
+
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get dashboard summary statistics
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/pipeline:
+    get:
+      operationId: getPipelineSummary
+      tags: [dashboard]
+      summary: Lead counts grouped by pipeline stage
+      responses:
+        "200":
+          description: Pipeline summary
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PipelineStageCount"
+
+  /dashboard/sources:
+    get:
+      operationId: getSourceBreakdown
+      tags: [dashboard]
+      summary: Lead counts grouped by source
+      responses:
+        "200":
+          description: Source breakdown
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SourceCount"
+
+  /dashboard/hot-leads:
+    get:
+      operationId: getHotLeads
+      tags: [dashboard]
+      summary: Top high-fit leads discovered in last 24h
+      responses:
+        "200":
+          description: Hot leads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lead"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    Lead:
+      type: object
+      required: [id, companyName, contactName, source, painPoint, fitScore, stage, approved, createdAt]
+      properties:
+        id:
+          type: integer
+        companyName:
+          type: string
+        contactName:
+          type: string
+        contactTitle:
+          type: ["string", "null"]
+        contactEmail:
+          type: ["string", "null"]
+        contactLinkedIn:
+          type: ["string", "null"]
+        companySize:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        source:
+          type: string
+          description: "reddit, linkedin, twitter, producthunt, indiehackers, manual"
+        sourceUrl:
+          type: ["string", "null"]
+        sourceContext:
+          type: ["string", "null"]
+          description: The raw post or signal that surfaced this lead
+        painPoint:
+          type: string
+          description: "cost, reliability, speed, vetting, other"
+        fitScore:
+          type: integer
+          description: 1-100 Duollance fit score
+        stage:
+          type: string
+          description: "discovered, contacted, in_discussion, onboarded, rejected"
+        approved:
+          type: boolean
+        notes:
+          type: ["string", "null"]
+        followUpAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    LeadInput:
+      type: object
+      required: [companyName, contactName, source, painPoint, fitScore]
+      properties:
+        companyName:
+          type: string
+        contactName:
+          type: string
+        contactTitle:
+          type: string
+        contactEmail:
+          type: string
+        contactLinkedIn:
+          type: string
+        companySize:
+          type: string
+        industry:
+          type: string
+        source:
+          type: string
+        sourceUrl:
+          type: string
+        sourceContext:
+          type: string
+        painPoint:
+          type: string
+        fitScore:
+          type: integer
+        notes:
+          type: string
+        followUpAt:
+          type: string
+
+    LeadUpdate:
+      type: object
+      properties:
+        companyName:
+          type: string
+        contactName:
+          type: string
+        contactTitle:
+          type: string
+        contactEmail:
+          type: string
+        contactLinkedIn:
+          type: string
+        companySize:
+          type: string
+        industry:
+          type: string
+        source:
+          type: string
+        sourceUrl:
+          type: string
+        sourceContext:
+          type: string
+        painPoint:
+          type: string
+        fitScore:
+          type: integer
+        stage:
+          type: string
+        approved:
+          type: boolean
+        notes:
+          type: string
+        followUpAt:
+          type: string
+
+    StageUpdate:
+      type: object
+      required: [stage]
+      properties:
+        stage:
+          type: string
+
+    OutreachMessage:
+      type: object
+      required: [id, leadId, channel, message, status, createdAt]
+      properties:
+        id:
+          type: integer
+        leadId:
+          type: integer
+        channel:
+          type: string
+          description: "email, linkedin, whatsapp, twitter"
+        message:
+          type: string
+        status:
+          type: string
+          description: "draft, sent, replied, no_response"
+        sentAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    OutreachInput:
+      type: object
+      required: [leadId, channel, message]
+      properties:
+        leadId:
+          type: integer
+        channel:
+          type: string
+        message:
+          type: string
+        status:
+          type: string
+
+    OutreachUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        sentAt:
+          type: string
+
+    PitchRequest:
+      type: object
+      required: [leadId]
+      properties:
+        leadId:
+          type: integer
+        channel:
+          type: string
+
+    PitchResponse:
+      type: object
+      required: [pitch]
+      properties:
+        pitch:
+          type: string
+
+    ScoreRequest:
+      type: object
+      required: [companyName, sourceContext, painPoint]
+      properties:
+        companyName:
+          type: string
+        sourceContext:
+          type: string
+        painPoint:
+          type: string
+        industry:
+          type: string
+
+    ScoreResponse:
+      type: object
+      required: [score, reasoning, painPointCategory]
+      properties:
+        score:
+          type: integer
+        reasoning:
+          type: string
+        painPointCategory:
+          type: string
+
+    DashboardStats:
+      type: object
+      required: [totalLeads, approvedLeads, contacted, inDiscussion, onboarded, avgFitScore, newToday]
+      properties:
+        totalLeads:
+          type: integer
+        approvedLeads:
+          type: integer
+        contacted:
+          type: integer
+        inDiscussion:
+          type: integer
+        onboarded:
+          type: integer
+        avgFitScore:
+          type: number
+        newToday:
+          type: integer
+
+    PipelineStageCount:
+      type: object
+      required: [stage, count]
+      properties:
+        stage:
+          type: string
+        count:
+          type: integer
+
+    SourceCount:
+      type: object
+      required: [source, count]
+      properties:
+        source:
+          type: string
+        count:
+          type: integer
