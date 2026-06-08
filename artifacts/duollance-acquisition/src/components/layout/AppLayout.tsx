@@ -8,7 +8,8 @@ import {
   MessageSquare, 
   ExternalLink,
   LogOut,
-  Menu
+  Menu,
+  Radar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -25,6 +26,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Discovery", href: "/discovery", icon: Radar },
     { name: "Leads", href: "/leads", icon: Users },
     { name: "Pipeline", href: "/pipeline", icon: KanbanSquare },
     { name: "Outreach", href: "/outreach", icon: MessageSquare },

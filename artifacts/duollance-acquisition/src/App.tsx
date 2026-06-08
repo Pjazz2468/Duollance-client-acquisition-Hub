@@ -17,6 +17,7 @@ import LeadDetail from "@/pages/LeadDetail";
 import Pipeline from "@/pages/Pipeline";
 import Outreach from "@/pages/Outreach";
 import Templates from "@/pages/Templates";
+import Discovery from "@/pages/Discovery";
 import AppLayout from "@/components/layout/AppLayout";
 
 const queryClient = new QueryClient({
@@ -155,6 +156,7 @@ function ClerkProviderWithRoutes() {
             <ProtectedRoute path="/pipeline" component={Pipeline} />
             <ProtectedRoute path="/outreach" component={Outreach} />
             <ProtectedRoute path="/templates" component={Templates} />
+            <ProtectedRoute path="/discovery" component={Discovery} />
             
             <Route component={NotFound} />
           </Switch>
