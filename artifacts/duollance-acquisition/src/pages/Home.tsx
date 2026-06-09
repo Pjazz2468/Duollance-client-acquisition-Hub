@@ -2,7 +2,6 @@ import { Show } from "@clerk/react";
 import { Redirect } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-
 export default function Home() {
   return (
     <>
@@ -37,6 +36,16 @@ export default function Home() {
                   Start Hunting
                 </Button>
               </Link>
+            </div>
+            <div className="mt-16 w-full max-w-4xl mx-auto rounded-2xl overflow-hidden shadow-2xl">
+              <video
+                src="https://res.cloudinary.com/dsmqkbssm/video/upload/q_auto/f_auto/v1780920978/Animate_this_for_me_202606081315_pdvirz.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-auto"
+              />
             </div>
           </main>
         </div>

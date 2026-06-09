@@ -1,24 +1,14 @@
 import { SignIn } from "@clerk/react";
-
 export default function SignInPage() {
   const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
-
   return (
     <div className="flex min-h-screen">
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
+        <img
+          src="https://res.cloudinary.com/dsmqkbssm/image/upload/q_auto/f_auto/v1780919882/Gemini_Generated_Image_ry1yvkry1yvkry1y_h1dvmi.png"
+          alt="Professional working remotely"
           className="absolute inset-0 w-full h-full object-cover"
-          poster="https://res.cloudinary.com/dsmqkbssm/image/upload/q_auto/f_auto/v1780919882/Gemini_Generated_Image_ry1yvkry1yvkry1y_h1dvmi.png"
-        >
-          <source
-            src="https://res.cloudinary.com/dsmqkbssm/video/upload/q_auto/f_auto/v1780920978/Animate_this_for_me_202606081315_pdvirz.mp4"
-            type="video/mp4"
-          />
-        </video>
+        />
         <div className="absolute inset-0 bg-gradient-to-br from-[#0f172a]/75 via-[#0f172a]/55 to-[#1c3cf5]/35" />
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
           <div>
@@ -40,7 +30,6 @@ export default function SignInPage() {
           </div>
         </div>
       </div>
-
       <div className="w-full lg:w-1/2 flex flex-col items-center justify-center bg-gray-50 px-6 py-12">
         <div className="w-full max-w-sm space-y-6">
           <div className="lg:hidden mb-4 flex justify-center">
