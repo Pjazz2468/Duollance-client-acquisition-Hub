@@ -7,21 +7,21 @@ export default function SignUpPage() {
     <div className="flex min-h-screen">
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         <img
-          src="/hero-auth.jpg"
+          src="https://res.cloudinary.com/dsmqkbssm/image/upload/q_auto/f_auto/v1780919882/Gemini_Generated_Image_ry1yvkry1yvkry1y_h1dvmi.png"
           alt="Professional working remotely"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0f172a]/80 via-[#0f172a]/60 to-[#1c3cf5]/40" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0f172a]/75 via-[#0f172a]/55 to-[#1c3cf5]/35" />
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
           <div>
             <img src="/logo-white.png" alt="Duollance" className="h-7" />
           </div>
           <div className="space-y-4">
-            <blockquote className="text-white text-3xl font-bold leading-tight tracking-tight">
+            <blockquote className="text-white text-3xl font-bold leading-tight tracking-tight drop-shadow-lg">
               The precision instrument<br />
               for <span className="text-blue-300">sales hunters.</span>
             </blockquote>
-            <p className="text-white/70 text-base max-w-sm leading-relaxed">
+            <p className="text-white/75 text-base max-w-sm leading-relaxed drop-shadow">
               Discover, qualify, and reach out to potential business clients — powered by AI.
             </p>
           </div>

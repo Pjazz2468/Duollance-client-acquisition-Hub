@@ -81,9 +81,7 @@ export default function Leads() {
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Leads</h1>
           <p className="text-sm text-muted-foreground">Manage and qualify your potential clients.</p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" /> Add Lead
-        </Button>
+        <CreateLeadDialog />
       </div>
 
       <div className="flex items-center space-x-2">
