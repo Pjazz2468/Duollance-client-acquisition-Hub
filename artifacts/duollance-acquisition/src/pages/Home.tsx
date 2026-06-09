@@ -31,7 +31,7 @@ export default function Home() {
                   Sign In
                 </Link>
                 <Link href="/sign-up">
-                  <Button variant="outline" className="border-white text-black hover:bg-white hover:text-black">
+                  <Button className="bg-primary text-white hover:bg-primary/90">
                     Get Started
                   </Button>
                 </Link>
