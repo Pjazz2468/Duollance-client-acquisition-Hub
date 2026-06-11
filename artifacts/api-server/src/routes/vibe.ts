@@ -70,10 +70,8 @@ router.post("/vibe/prospects", async (req, res): Promise<void> => {
         size: 5,
         page_size: 5,
         page: 1,
-        filters: {
+        ffilters: {
           business_id: { type: "includes", values: business_ids },
-          job_department: { type: "includes", values: job_department },
-          job_level: { type: "includes", values: ["manager", "director", "vp", "c_suite", "owner"] },
         },
       }),
     });
