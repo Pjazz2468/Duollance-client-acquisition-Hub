@@ -468,7 +468,7 @@ router.post("/discovery/import", async (req, res): Promise<void> => {
 
   res.status(201).json({ lead });
   } catch (err: any) {
-    console.error("Import error:", err?.message, err?.cause);
+    console.error("Import error:", err?.message, err?.cause, JSON.stringify(err));
     res.status(500).json({ error: err?.message });
   }
 });
