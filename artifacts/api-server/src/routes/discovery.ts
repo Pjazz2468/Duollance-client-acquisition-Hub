@@ -451,6 +451,7 @@ router.post("/discovery/import", async (req, res): Promise<void> => {
   else if (srcLower.includes("twitter") || srcLower.includes("x /")) sourceField = "twitter";
   else if (srcLower.includes("linkedin")) sourceField = "linkedin";
 
+  try {
   const [lead] = await db.insert(leadsTable).values({
     companyName,
     contactName: d.author,
@@ -466,6 +467,10 @@ router.post("/discovery/import", async (req, res): Promise<void> => {
   }).returning();
 
   res.status(201).json({ lead });
+  } catch (err: any) {
+    console.error("Import error:", err?.message, err?.cause);
+    res.status(500).json({ error: err?.message });
+  }
 });
 
 export default router;
