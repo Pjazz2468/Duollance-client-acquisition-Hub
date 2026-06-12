@@ -57,8 +57,7 @@ const HN_SEARCH_QUERIES = [
 ];
 
 const X_SEARCH_QUERY =
-  "(looking for freelancer OR hiring freelancer OR need freelance OR ISO freelancer OR need a designer OR need a developer OR need a copywriter) -is:retweet lang:en";
-
+  "(\"looking for a freelancer\" OR \"need a freelance developer\" OR \"need a freelance designer\" OR \"looking for a web developer\" OR \"need a mobile app\" OR \"hiring remote developer\" OR \"need a UI designer\" OR \"need digital marketing\" OR \"recommend a good developer\" OR \"freelancer ghosted\" OR \"freelancer disappeared\" OR \"bad freelancer\" OR \"fired my developer\" OR \"developer went MIA\" OR \"designer flaked\" OR \"contractor disappeared\" OR \"upwork nightmare\" OR \"fiverr disaster\" OR \"tired of bad freelancers\" OR \"can't find good developers\" OR \"hard to find good designers\" OR \"struggling to find talent\" OR \"offshore team problems\" OR \"outsourcing nightmare\") -is:retweet lang:en";
 // ─── LOCAL PRE-SCORER ─────────────────────────────────────────────────────────
 
 function scorePost(text: string): { score: number; reason: string } {
